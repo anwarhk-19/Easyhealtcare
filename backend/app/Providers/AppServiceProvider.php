@@ -7,6 +7,7 @@ use App\Services\Ai\AiProvider;
 use App\Services\Ai\AnthropicProvider;
 use App\Services\Ai\FakeProvider;
 use App\Support\Tenancy\TenantContext;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -34,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
 
             return null;
         });
+
+        // Password-reset emails link to the SPA, which posts the token back to the API.
+        ResetPassword::createUrlUsing(fn ($user, string $token) => rtrim(config('app.frontend_url'), '/').'/reset-password?token='.$token.'&email='.urlencode($user->email));
 
         RateLimiter::for('api', fn (Request $r) => Limit::perMinute(120)->by($r->user()?->getAuthIdentifier() ?: $r->ip()));
         RateLimiter::for('login', fn (Request $r) => [Limit::perMinute(5)->by(strtolower((string) $r->input('email')).'|'.$r->ip()), Limit::perMinute(20)->by($r->ip())]);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\OpenApiCommand;
 use App\Exceptions\BusinessRuleException;
 use App\Http\Middleware\EnsureFeature;
 use App\Http\Middleware\EnsureOrganizationActive;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([OpenApiCommand::class])
     ->withBroadcasting(__DIR__.'/../routes/channels.php', ['prefix' => 'api', 'middleware' => ['auth:sanctum', 'tenant']])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

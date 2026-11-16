@@ -1,22 +1,61 @@
 # EasyHealthcare — Multi-Speciality Clinic Management SaaS
 
-A multi-tenant, subscription-based clinic management platform for single-doctor clinics through multi-branch, multi-speciality groups.
+Multi-tenant, subscription-based clinic management for single-doctor clinics through multi-branch, multi-speciality groups (India-first: INR, GST, DPDP, WhatsApp/DLT).
 
-**Planned stack:** Laravel 12 · PHP 8.3 · MySQL 8 · Redis · Sanctum · Reverb · Vue 3 + TypeScript · Tailwind CSS.
+**Stack:** Laravel 12 · PHP 8.3 · MySQL 8 · Redis · Sanctum · Reverb · Vue 3 + TypeScript · Tailwind CSS 4 · Vite.
 
 ## Status
 
-**Phases 1–2 (requirements, architecture, database design) are drafted and awaiting review.** No application code yet. Implementation (Phase 3) starts after the documents below and the decisions in `docs/08-open-decisions.md` are approved.
+Phases 1–12 are implemented and Phase 13 is code-complete. See **[docs/09-implementation-status.md](docs/09-implementation-status.md)** for what was verified, the deviations from the plan, and the list of gaps to close before production.
 
-## Planning pack
+## Quick start (local)
 
-| # | Document | Covers |
-|---|---|---|
-| 01 | [Product Requirements](docs/01-product-requirements.md) | Vision, personas, module-wise feature breakdown with MVP priority, workflows, NFRs, AI policy, Indian regulatory notes, MVP scope |
-| 02 | [Roles & Permissions](docs/02-roles-and-permissions.md) | Tenant and platform role matrices, data-scope rules, permission catalogue |
-| 03 | [Architecture](docs/03-architecture.md) | Modular monolith, multi-tenant isolation layers, speciality extensibility, subscriptions, real-time, notifications, security, deployment, frontend |
-| 04 | [Database Schema & ERD](docs/04-database-schema.md) | All tables by module, indexes, double-booking guard, ERD (Mermaid) |
-| 05 | [API Specification](docs/05-api-specification.md) | Conventions, endpoint inventory, real-time channels |
-| 06 | [Navigation & Design System](docs/06-navigation-and-design-system.md) | App structure, role landing pages, key screens, design tokens, components |
-| 07 | [Milestones & Testing](docs/07-milestones-and-testing.md) | Phase plan with exit criteria and estimates, testing strategy, Definition of Done |
-| 08 | [Open Decisions](docs/08-open-decisions.md) | Decisions needed before Phase 3, with recommended defaults |
+```bash
+# Backend
+cd backend
+composer install
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite          # or point DB_* at MySQL 8
+php artisan migrate --seed              # seeds plans, roles, specialities, templates + a demo clinic
+php artisan serve                       # http://localhost:8000
+php artisan queue:work & php artisan schedule:work &
+
+# Frontend
+cd ../frontend
+npm install
+npm run dev                             # http://localhost:5173 (proxies /api to :8000)
+```
+
+Sign in as `owner@demo.clinic` / `password` (other demo users are listed in the status doc). Or run everything with `docker compose up`.
+
+## Tests
+
+```bash
+cd backend && php artisan test          # 61 tests incl. tenant isolation & permission matrix
+cd frontend && npm run typecheck && npm test && npm run build
+```
+
+CI (`.github/workflows/ci.yml`) runs the backend suite against MySQL 8, code style, dependency audits, OpenAPI drift check, and the frontend typecheck/tests/build.
+
+## Layout
+
+```
+backend/   Laravel API — app/Services (business rules), app/Support/Tenancy (isolation), routes/api.php
+frontend/  Vue 3 SPA — staff app, /admin (platform), /patient (patient app), /display/:token (TV queue)
+docs/      Planning pack (01–08), implementation status (09), generated OpenAPI (openapi.json)
+infra/     Dockerfile(s)
+```
+
+## Documentation
+
+| # | Document |
+|---|---|
+| 01 | [Product Requirements](docs/01-product-requirements.md) |
+| 02 | [Roles & Permissions](docs/02-roles-and-permissions.md) — enforced by `backend/app/Support/Rbac/PermissionCatalog.php` |
+| 03 | [Architecture](docs/03-architecture.md) |
+| 04 | [Database Schema & ERD](docs/04-database-schema.md) |
+| 05 | [API Specification](docs/05-api-specification.md) + generated [openapi.json](docs/openapi.json) |
+| 06 | [Navigation & Design System](docs/06-navigation-and-design-system.md) |
+| 07 | [Milestones & Testing](docs/07-milestones-and-testing.md) |
+| 08 | [Decisions](docs/08-open-decisions.md) — recommended defaults were adopted |
+| 09 | [Implementation Status](docs/09-implementation-status.md) |
