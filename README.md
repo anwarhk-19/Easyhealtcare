@@ -8,7 +8,18 @@ Multi-tenant, subscription-based clinic management for single-doctor clinics thr
 
 Phases 1–12 are implemented and Phase 13 is code-complete. See **[docs/09-implementation-status.md](docs/09-implementation-status.md)** for what was verified, the deviations from the plan, and the list of gaps to close before production.
 
-## Quick start (local)
+## Run without npm (PHP only)
+
+The frontend is prebuilt into `backend/public/spa`, so you only need **PHP 8.3+ and Composer**:
+
+```bash
+./start.sh          # Linux / macOS
+start.bat           # Windows
+```
+
+Then open http://localhost:8000 and sign in as `owner@demo.clinic` / `password`. The script installs PHP packages, creates `.env`, sets up a SQLite database with the demo clinic, and starts the server. Node/npm is only needed if you change the frontend (`cd frontend && npm install && npm run build` refreshes `backend/public/spa`).
+
+## Developer setup (with hot reload)
 
 ```bash
 # Backend

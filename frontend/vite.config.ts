@@ -6,6 +6,9 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  // Production build is written into the Laravel app so it can be served with PHP only (no Node at runtime).
+  base: '/spa/',
+  build: { outDir: '../backend/public/spa', emptyOutDir: true },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: { port: 5173, proxy: { '/api': { target: process.env.API_URL ?? 'http://localhost:8000', changeOrigin: true } } },
   test: { environment: 'jsdom' },
